@@ -40,17 +40,21 @@ function writeCommandToDatabase($command_name, $chat_id){
 }
 
 // запись команды в БД
-function writeCommandLog($message, $bot){
-	$logCheck = writeCommandToDatabase($message->getText(), $message->getChat()->getId());
-	$commandName = $message->getText();
-	$responseText = '';
-	if($logCheck === true){
-		$responseText = "Команда {$commandName} была записана в лог!"; 
+function writeCommandLog($message, $bot, $realCommand){
+
+	$logCheck = null;
+
+	if($realCommand === true){
+		$logCheck = writeCommandToDatabase($message->getText(), $message->getChat()->getId());
 	} else {
-		$responseText = "ОШИБКА! Команда {$commandName} не была записана в лог!";
+		$logCheck = writeCommandToDatabase('NULL', $message->getChat()->getId());
 	}
 
-	$bot->sendMessage($message->getChat()->getId(), $responseText);
+	if($logCheck === true){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
