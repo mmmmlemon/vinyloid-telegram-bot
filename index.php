@@ -34,7 +34,7 @@ try {
         $check = writeCommandLog($message, $bot, true);
 
         if($check){
-            $answer = "Введите название исполнителя или альбома.\n\nДопустимые варианты:\n'Кино'\n'Звезда по имени Солнце'\n'metallica'\n'sgt peppers lonely hearts club band'\n\nВводить желательно без знаков препинания. Работают как строчные так и прописные буквы.";
+            $answer = "Введите название исполнителя или альбома.\n\nНапример:\n'Кино'\n'Русское поле экспериментов'\n'metallica'\n'sgt peppers lonely hearts club band'\n\nВводить желательно без знаков препинания. Работают как строчные так и прописные буквы.";
             $bot->sendMessage($message->getChat()->getId(),  $answer);
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
