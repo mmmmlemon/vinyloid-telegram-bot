@@ -10,6 +10,8 @@
     
         $messageText = "";
 
+        $arrayOfMessages = [];
+
         // найти все пластинки и добавить в сообщение
         foreach ($html->find('div.products-grid-item') as $productItem) {
             // ищем <a> ссылку на пластинку
@@ -37,15 +39,27 @@
     
             // если url не равен null, добавляем в сообщение
             if($lpUrl !== null){
-                $messageText .= "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \nКупить: https://plastinka.com" . $lpUrl . " \n\n";
+
+                $append = "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \nКупить: https://plastinka.com" . $lpUrl . " \n\n";
+
+                if(4096 - strlen($messageText) >= strlen($append)){
+                    $messageText .= $append;
+                } else {
+                    array_push($arrayOfMessages, $messageText);
+                    $messageText = "";
+                }
+                
             }
-    
         }
 
-        if($messageText === ""){
+        if($messageText !== ""){
+            array_push($arrayOfMessages, $messageText);
+        }
+
+        if(count($arrayOfMessages) === 0){
             return false;
         } else {
-            return  $messageText;
+            return  $arrayOfMessages;
         }
     }
     
