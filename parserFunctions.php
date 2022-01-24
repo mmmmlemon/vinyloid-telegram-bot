@@ -42,7 +42,7 @@
 
                 $append = "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \nКупить: https://plastinka.com" . $lpUrl . " \n\n";
 
-                if(4096 - strlen($messageText) >= strlen($append)){
+                if(1500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
                 } else {
                     array_push($arrayOfMessages, $messageText);

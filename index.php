@@ -50,17 +50,39 @@ try {
     
     //Текстовые сообщения
     $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot) {
-        $message = $update->getMessage();
-        $id = $message->getChat()->getId();
 
-        $latestCommand = getLatestCommand($id);
+        // // проверяем коллбэки
+        $callbackQuery = $update->getCallbackQuery();
 
-        writeCommandLog($message, $bot, false);
+        // если нажата кнопка "Показать ещё"
+        if ($callbackQuery !== null && $callbackQuery->getData() === 'showMoreProducts') {
+            $bot->answerCallbackQuery(
+                $callbackQuery->getId(),
+                'Показать ещё больше товаров!',
+                true
+            );
+        // если нажата кнопка "Достаточно"
+        } else if($callbackQuery !== null && $callbackQuery->getData() === 'stopProducts'){
+            $bot->answerCallbackQuery(
+                $callbackQuery->getId(),
+                'Достаточно...',
+                true
+            );
+        }
+        // если нет коллбэков, проверяем отправленное сообщение
+        else {
+            
+            $message = $update->getMessage();
 
-        executeByLatestCommand($latestCommand, $message, $bot, $id);
+            $id = $message->getChat()->getId();
 
-        // $bot->sendMessage($id, 'Пожалуйста, напишите команду. Команды начинаются со знака /');
+            $latestCommand = getLatestCommand($id);
 
+            writeCommandLog($message, $bot, false);
+
+            executeByLatestCommand($latestCommand, $message, $bot, $id);
+        }
+    
     }, function () {
         return true;
     });
@@ -68,9 +90,12 @@ try {
 
     $bot->run();
 
-
 } catch (\TelegramBot\Api\Exception $e) {
     $e->getMessage();
+
+
+
+
 }
 
 ?>
