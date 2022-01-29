@@ -40,7 +40,7 @@ function writeCommandToDatabase($command_name, $chat_id){
 }
 
 // запись команды в БД
-function writeCommandLog($message, $bot, $realCommand){
+function writeCommandLog($message, $realCommand){
 
 	$logCheck = null;
 
