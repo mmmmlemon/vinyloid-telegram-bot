@@ -72,7 +72,7 @@ try {
         if ($callbackQuery !== null) {
 
             //записать команду в лог
-            $check = writeCommandLog($message, true);
+            $check = true;
 
             if($check){
                 // если коллбэк есть, то отправляем запрос на парсинг и показываем страницу соответствующую кнопке

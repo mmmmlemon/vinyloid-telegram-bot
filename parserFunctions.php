@@ -40,9 +40,9 @@
             // если url не равен null, добавляем в сообщение
             if($lpUrl !== null){
 
-                $append = "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \nКупить: https://plastinka.com" . $lpUrl . " \n\n";
+                $append = "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
 
-                if(1500 - strlen($messageText) >= strlen($append)){
+                if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
                 } else {
                     array_push($arrayOfMessages, $messageText);
