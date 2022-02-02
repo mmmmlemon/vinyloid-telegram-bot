@@ -36,7 +36,7 @@ try {
     // команда help
     $bot->command('help', function ($message) use ($bot) {
         //записать команду в лог
-        $check = writeCommandLog($message, $bot, true);
+        $check = writeCommandLog($message, true);
 
         if($check){
             // получаем ответ
@@ -72,9 +72,10 @@ try {
         if ($callbackQuery !== null) {
 
             //записать команду в лог
-            $check = true;
+            $check = writeCommandLog($callbackQuery->getMessage(), false);
 
             if($check){
+                
                 // если коллбэк есть, то отправляем запрос на парсинг и показываем страницу соответствующую кнопке
                 $index = strpos($callbackQuery->getData(), '[');
                 // страница

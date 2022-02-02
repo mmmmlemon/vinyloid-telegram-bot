@@ -25,10 +25,17 @@ ou<?php
             $lpName = $productItem->find('div.products-grid-item__title')->find('a')[0]->innerText;
             // получаем характеристики пластинки
             $lpParams = $productItem->find('div.products-grid-item__params')->find('a')[0]->innerText;
+
+            
+
             // заменяем HTML-теги на пробелы
             $lpParams = str_replace('<', ' <', $lpParams);
             $lpParams = strip_tags($lpParams);
             $lpParams = preg_replace('/\s+/', ' ', $lpParams);
+            $lpParamsExplode = explode(" ", $lpParams);
+            $lpCountryAndLabel = $lpParamsExplode[0] . "/" . $lpParamsExplode[2];
+            $lpType = $lpParamsExplode[count($lpParamsExplode) - 2];
+            $lpCondition = $lpParamsExplode[count($lpParamsExplode) - 1];
             // убираем переносы строк и пробелы
             // $lpParams = str_replace(array("\r", "\n"), ' ', $lpParams);
             // $lpParams = preg_replace('/\s+/', ' ', $lpParams);
@@ -40,7 +47,7 @@ ou<?php
             // если url не равен null, добавляем в сообщение
             if($lpUrl !== null){
 
-                $append = "{$artistName} - {$lpName} \n<b><i>{$lpPrice}</i></b> \n<i>({$lpParams})</i> \n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
+                $append = "{$artistName} - {$lpName} \n<i>{$lpCountryAndLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$lpType} {$lpCondition})</i>\n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
