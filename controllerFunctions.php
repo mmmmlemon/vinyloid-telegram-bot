@@ -4,6 +4,25 @@ require_once "vendor/autoload.php";
 require __DIR__ . '/dbFunctions.php';
 require __DIR__ . '/parserFunctions.php';
 
+
+// запись команды в БД
+function writeCommandLog($message, $realCommand){
+
+	$logCheck = null;
+
+	if($realCommand === true){
+		$logCheck = writeCommandToDatabase($message->getText(), $message->getChat()->getId());
+	} else {
+		$logCheck = writeCommandToDatabase('NULL', $message->getChat()->getId());
+	}
+
+	if($logCheck === true){
+		return true;
+	} else {
+		return false;
+	}
+}
+
 // start
 function startCommand(){
     $response = "Бот начал работу 🤖 \nДля справки по работе с ботом выполните команду /help";

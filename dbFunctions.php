@@ -54,23 +54,6 @@ function writeNotificationToDatabase($chatId, $item){
 
 }
 
-// запись команды в БД
-function writeCommandLog($message, $realCommand){
-
-	$logCheck = null;
-
-	if($realCommand === true){
-		$logCheck = writeCommandToDatabase($message->getText(), $message->getChat()->getId());
-	} else {
-		$logCheck = writeCommandToDatabase('NULL', $message->getChat()->getId());
-	}
-
-	if($logCheck === true){
-		return true;
-	} else {
-		return false;
-	}
-}
 
 // получить последнюю команду из БД
 function getLatestCommand($chat_id){
