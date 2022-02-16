@@ -61,7 +61,20 @@ try {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
         }
     });
-    
+
+    // команда additem
+    $bot->command('additem', function($message) use ($bot){ 
+        //записать команду в лог
+        $check = writeCommandLog($message, true);
+
+        if($check){
+            $response = additemCommand();
+            $bot->sendMessage($message->getChat()->getId(),  $response);
+        } else {
+            $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
+        }
+    });
+
     //Текстовые сообщения и коллбэки
     $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot) {
 
@@ -152,8 +165,20 @@ try {
                 } else {
                     $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
                 }
+            } 
+            
+            else if($latestCommand === "/additem"){
+                // запись команды NULL в лог
+                $check = writeCommandLog($message, false);
 
-            } else {
+                if($check){
+                    // генерируем список товаров на основе введённого текста
+                    $response = addNotification($message->getChat()->getId(), $message->getText());
+                    $bot->sendMessage($message->getChat()->getId(), $response, 'HTML');
+                }
+            }
+            
+            else {
                 // запись команды NULL в лог
                 writeCommandLog($message, false);
                 $bot->sendMessage($id, 'Пожалуйста, напишите команду. Список команд можно посмотреть в /help');

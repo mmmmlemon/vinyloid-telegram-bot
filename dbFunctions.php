@@ -26,7 +26,6 @@ function connectToDatabase(){
 function writeCommandToDatabase($command_name, $chat_id){
 
 	$connection = connectToDatabase();
-	$time = date("Y-m-d",$t);
 	$sql = "INSERT INTO command_log (command_name, chat_id)
 	VALUES ('{$command_name}', '{$chat_id}')";
 
@@ -37,6 +36,22 @@ function writeCommandToDatabase($command_name, $chat_id){
 	}
 	
 	$connection->close();
+}
+
+// записать уведомление в БД
+function writeNotificationToDatabase($chatId, $item){
+
+	$connection = connectToDatabase();
+	$sql = "INSERT INTO notifications (chat_id, search_text)
+			VALUES ('{$chatId}', '{$item}')";
+	if($connection->query($sql) === TRUE){
+		return true;
+	} else {
+		return false;
+	}
+
+	$connection->close();
+
 }
 
 // запись команды в БД
@@ -57,7 +72,7 @@ function writeCommandLog($message, $realCommand){
 	}
 }
 
-
+// получить последнюю команду из БД
 function getLatestCommand($chat_id){
 
 	$connection = connectToDatabase();
@@ -69,6 +84,22 @@ function getLatestCommand($chat_id){
 	$latestCommandName = $response->fetch_assoc()['command_name'];
 
 	return $latestCommandName;
+}
+
+// получить уведомления о пластинках (TO DO)
+function getNotifications(){
+
+	$connection = connectToDatabase();
+	$sql = "SELECT chat_id, search_text FROM notifications";
+
+	$response = $connection->query($sql);
+	$result = [];
+	while($row = $response->fetch_assoc()){
+		array_push($result, $row);
+	}
+
+	return $result;
+
 }
 
 

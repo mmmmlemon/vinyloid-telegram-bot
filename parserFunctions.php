@@ -1,7 +1,7 @@
-ou<?php
+<?php
     require "vendor/autoload.php";
     use voku\helper\HtmlDomParser;
-
+    
     function parserTest($search){
 
         $searchText = eraseSpaces($search);
@@ -51,10 +51,6 @@ ou<?php
 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
-                    // Добавляем нового человека в файл
-                    $current .= "{$lpName} - {$lpPrice}\n";
-                    // Пишем содержимое обратно в файл
-                    file_put_contents($file, $current);
                 } else {
                     $messageText .= $append;
                     array_push($arrayOfMessages, $messageText);
@@ -71,7 +67,7 @@ ou<?php
         if(count($arrayOfMessages) === 0){
             return false;
         } else {
-            return  $arrayOfMessages;
+            return $arrayOfMessages;
         }
     }
     
