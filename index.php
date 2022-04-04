@@ -75,8 +75,26 @@ try {
         }
     });
 
-     // команда showitems
-     $bot->command('showitems', function($message) use ($bot){
+    $bot->command('deleteitem', function($message) use ($bot){
+        // записать команду в лог
+        $check = writeCommandLog($message, true);
+
+        if($check){
+            $response = deleteitemCommand($message->getChat()->getId());
+
+            foreach($response as $msg){
+                $bot->sendMessage($message->getChat()->getId(), $msg);    
+            }
+
+            
+            // $bot->sendMessage($message->getChat()->getId(), $response['message'], null, false, null, $response['keyboardObject']);
+        } else {
+            $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
+        }
+    });
+
+    // команда showitems
+    $bot->command('showitems', function($message) use ($bot){
         //записать команду в лог
         $check = writeCommandLog($message, true);
 
@@ -221,6 +239,20 @@ try {
                     $response = addNotification($message->getChat()->getId(), $message->getText());
                     $bot->sendMessage($message->getChat()->getId(), $response, 'HTML');
                 }
+            }
+
+            else if ($latestCommand === "/deleteitem"){
+
+                // запись команды NULL в лог
+                $check = writeCommandLog($message, false);
+
+                if($check){
+                    // генерируем список товаров на основе введённого текста
+                    $response = deleteNotification($message->getChat()->getId(), $message->getText());
+                    $removeKeyboard = new \TelegramBot\Api\Types\ReplyKeyboardRemove();
+                    $bot->sendMessage($message->getChat()->getId(), $response, 'HTML', true,  null , $removeKeyboard);
+                }
+         
             }
             
             else {
