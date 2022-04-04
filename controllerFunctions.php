@@ -31,7 +31,7 @@ function startCommand(){
 // help
 function helpCommand(){
     $response = "Этот бот предназначен для поиска виниловых пластинок в Интернете. Бот находится в стадии разработки, сейчас реализован поиск по сайту plastinka.com \n\nСписок доступных команд:
-    \n/start - начать работу с ботом\n/help - список команд и справка по работе с ботом\n/find - поиск пластинок\n/additem - добавить артиста или пластинку для еженедельной проверки ботом";
+    \n/start - начать работу с ботом\n/help - список команд и справка по работе с ботом\n/find - поиск пластинок\n/additem - добавить артиста или пластинку для еженедельной проверки ботом\n/showitems - показать список артистов\альбомов для еженедельной проверки";
     return $response;
 }
 
@@ -41,9 +41,82 @@ function findCommand(){
     return $response;
 }
 
+// checklps
+function checklpsCommand($chatId){
+    $messages = [];
+    $notifications = getNotifications($chatId);
+
+    if(count($notifications) == 0){
+        array_push($messages, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");
+    } 
+    else 
+    {
+        foreach($notifications as $notification){
+
+            $findResults = parserTest($notification);
+            
+            // если результатов поиска больше одного сообщения, то добавляем клавиатуру
+            if(count($findResults) > 1){
+                
+                // кнопки клавиатуры
+                $keyboardButtons = [];
+
+                for($i = 0; $i < count($findResults); $i++){
+                    $pageNumForButton = $i + 1;
+                    if($i == $pageToShow){
+                        $pageNumForButton = "- ".strval($pageNumForButton)." -";
+                    }
+                
+                    array_push($keyboardButtons, ['text' => "{$pageNumForButton}", 
+                                                'callback_data' => "{$i}[{$notification}]"]);
+                }
+
+                $keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup([$keyboardButtons]);
+
+                $response = [
+                    'message' => $findResults[0],
+                    'keyboard' => true,
+                    'keyboardObject' => $keyboard
+                ]; 
+                
+                array_push($messages, $response);
+            } else {
+                // если результатов на одно сообщение, то добавляем текст сообщения без клавиатуры
+                $response = [
+                    'message' => $findResults[0],
+                    'keyboard' => false,
+                ]; 
+
+                array_push($messages, $response);
+            }
+
+        }
+    
+        if(count($messages) > 0){
+            array_unshift($messages, "Вот все пластинки которые мне удалось найти 💽");
+        } else {
+            array_push($messages, "По запросам не найдено ни одной пластинки.");
+        }
+    }
+
+    return $messages;
+}
+
 // additem
 function additemCommand(){
     $response = "Введите название исполнителя/группы 👩‍🎤 или альбома 💽 чтобы добавить его в список уведомлений.\n\nБот будет проверять наличие пластинок раз в неделю и отправлять вам отчёт (воскресение, 00:00 по МСК).";
+    return $response;
+}
+
+// showitems
+function showitemsCommand($chatId){
+
+    $notifications = getNotifications($chatId);
+    $response = "Список всех артистов\альбомов для еженедельной проверки ✔\n\n";
+    foreach($notifications as $notification){
+        $response .= $notification."\n";
+    }
+
     return $response;
 }
 

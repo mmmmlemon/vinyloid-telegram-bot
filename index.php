@@ -75,6 +75,51 @@ try {
         }
     });
 
+     // команда showitems
+     $bot->command('showitems', function($message) use ($bot){
+        //записать команду в лог
+        $check = writeCommandLog($message, true);
+
+        if($check){
+            $response = showitemsCommand($message->getChat()->getId());
+            $bot->sendMessage($message->getChat()->getId(),  $response, 'HTML');
+        } else {
+            $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
+        }
+    });
+
+      // команда checklps
+      $bot->command('checklps', function($message) use ($bot){
+        $check = writeCommandLog($message, true);
+
+        if($check){
+            // получаем результаты
+            $response = checklpsCommand($message->getChat()->getId());
+
+            // выводим все сообщения
+            foreach($response as $msg){
+                
+                // если это текстовое сообщение
+                if(gettype($msg) == 'string'){
+                    $bot->sendMessage($message->getChat()->getId(), $msg, 'HTML', true, null);
+                }
+
+                // если это сообщение с информацией о пластинках
+                else if(gettype($msg) == 'array'){
+                    // выводим сообщение с клавиатурой или без неё
+                    if($msg['keyboard'] === false){
+                        $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true, null);
+                    } else {
+                        $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true,  null , $msg['keyboardObject']);
+                    }  
+                }    
+            } 
+        } else {
+            $bot->sendMessage($message->getChat()->getId(), "⚠ Ошибка записи команды в лог ⚠");
+        }
+    });
+
+    
     //Текстовые сообщения и коллбэки
     $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot) {
 
@@ -189,7 +234,6 @@ try {
     }, function () {
         return true;
     });
-
 
     $bot->run();
 

@@ -70,15 +70,15 @@ function getLatestCommand($chat_id){
 }
 
 // получить уведомления о пластинках (TO DO)
-function getNotifications(){
+function getNotifications($chatId){
 
 	$connection = connectToDatabase();
-	$sql = "SELECT chat_id, search_text FROM notifications";
+	$sql = "SELECT chat_id, search_text FROM notifications WHERE chat_id = '{$chatId}'";
 
 	$response = $connection->query($sql);
 	$result = [];
 	while($row = $response->fetch_assoc()){
-		array_push($result, $row);
+		array_push($result, $row['search_text']);
 	}
 
 	return $result;
