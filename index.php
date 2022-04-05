@@ -56,7 +56,7 @@ try {
 
         if($check){
             $response = findCommand();
-            $bot->sendMessage($message->getChat()->getId(),  $response);
+            $bot->sendMessage($message->getChat()->getId(),  $response, 'HTML');
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
         }

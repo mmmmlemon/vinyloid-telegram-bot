@@ -6,4 +6,14 @@ function eraseSpaces($string){
     return $newString;
 }
 
+function normalizeString($string){
+
+    $string = eraseSpaces($string);
+
+    $string = strtolower($string);
+
+    return $string;
+
+}
+
 ?>
