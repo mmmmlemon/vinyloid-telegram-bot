@@ -51,7 +51,23 @@ function writeNotificationToDatabase($chatId, $item){
 	}
 
 	$connection->close();
+}
 
+// проверить наличие уведомления перед удалением
+function checkItemBeforeDelete($chatId, $item){
+    $connection = connectToDatabase();
+	$sql = "SELECT chat_id, search_text FROM notifications WHERE chat_id = '{$chatId}' AND search_text = '{$item}'";
+	$response = $connection->query($sql);
+	
+	$results = $response->fetch_assoc();
+
+	$connection->close();
+
+	if(count($results) === 0){
+		return false;
+	} else {
+		return true;
+	}
 }
 
 // удалить уведомление из БД
@@ -68,7 +84,6 @@ function deleteNotificationFromDatabase($chatId, $item){
 	$connection->close();
 
 }
-
 
 // получить последнюю команду из БД
 function getLatestCommand($chat_id){
@@ -97,8 +112,6 @@ function getNotifications($chatId){
 	}
 
 	return $result;
-
 }
-
 
 ?>

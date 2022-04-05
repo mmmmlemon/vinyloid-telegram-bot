@@ -249,8 +249,7 @@ try {
                 if($check){
                     // генерируем список товаров на основе введённого текста
                     $response = deleteNotification($message->getChat()->getId(), $message->getText());
-                    $removeKeyboard = new \TelegramBot\Api\Types\ReplyKeyboardRemove();
-                    $bot->sendMessage($message->getChat()->getId(), $response, 'HTML', true,  null , $removeKeyboard);
+                    $bot->sendMessage($message->getChat()->getId(), $response, 'HTML');
                 }
          
             }

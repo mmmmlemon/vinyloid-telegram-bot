@@ -26,8 +26,6 @@
             // получаем характеристики пластинки
             $lpParams = $productItem->find('div.products-grid-item__params')->find('a')[0]->innerText;
 
-            
-
             // заменяем HTML-теги на пробелы
             $lpParams = str_replace('<', ', <', $lpParams);
             $lpParams = strip_tags($lpParams);
@@ -46,7 +44,6 @@
                 $explodeStr .= $explode . " ";
             }
 
-
             // получить цену на пластинку
             $lpPrice = strip_tags($productItem->find('div.products-grid-item__price')[0]->innerText);
     
@@ -62,8 +59,7 @@
                     $messageText .= $append;
                     array_push($arrayOfMessages, $messageText);
                     $messageText = "";
-                }
-                
+                }          
             }
         }
 
