@@ -29,16 +29,22 @@
             
 
             // заменяем HTML-теги на пробелы
-            $lpParams = str_replace('<', ' <', $lpParams);
+            $lpParams = str_replace('<', ', <', $lpParams);
             $lpParams = strip_tags($lpParams);
             $lpParams = preg_replace('/\s+/', ' ', $lpParams);
-            $lpParamsExplode = explode(" ", $lpParams);
-            $lpCountryAndLabel = $lpParamsExplode[0] . "/" . $lpParamsExplode[2];
+            $lpParamsExplode = explode(", ", $lpParams);
+            $lpCountryAndLabel = $lpParamsExplode[0];
             $lpType = $lpParamsExplode[count($lpParamsExplode) - 2];
             $lpCondition = $lpParamsExplode[count($lpParamsExplode) - 1];
             // убираем переносы строк и пробелы
             // $lpParams = str_replace(array("\r", "\n"), ' ', $lpParams);
             // $lpParams = preg_replace('/\s+/', ' ', $lpParams);
+
+            $explodeStr = "";
+
+            foreach($lpParamsExplode as $explode){
+                $explodeStr .= $explode . " ";
+            }
 
 
             // получить цену на пластинку
@@ -48,6 +54,7 @@
             if($lpUrl !== null){
 
                 $append = "{$artistName} - {$lpName} \n<i>{$lpCountryAndLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$lpType} {$lpCondition})</i>\n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
+                // $append = $lpParams;
 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
