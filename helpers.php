@@ -8,8 +8,6 @@ function eraseSpaces($string){
 
 function normalizeString($string){
 
-    $string = eraseSpaces($string);
-
     $string = strtolower($string);
 
     return $string;

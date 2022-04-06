@@ -4,7 +4,7 @@
     
     function parserTest($search){
 
-        $searchText = normalizeString($search);
+        $searchText = eraseSpaces($search);
 
         $html = HtmlDomParser::file_get_html("https://plastinka.com/lp/search?str={$searchText}&params=%7B%22styles%22:%5B%5D,%22labels%22:%5B%5D,%22countries%22:%5B%5D,%22price_from%22:0,%22price_to%22:0,%22record_year_from%22:0,%22record_year_to%22:%222022%22,%22release_year_from%22:0,%22release_year_to%22:2022,%22types%22:%5B%5D,%22sort%22:%22artist%22,%22view_type%22:%22grid%22,%22page%22:1,%22per_page%22:10%7D");
     
@@ -45,13 +45,30 @@
             }
 
             // получить цену на пластинку
-            $lpPrice = strip_tags($productItem->find('div.products-grid-item__price')[0]->innerText);
+            $lpPrice = null;
+
+            // проверяем указана ли у пластинки старая цена
+            $lpPriceOld = $productItem->find('span.prev-price');
+
+            // если у пластинки указана старая цена, значит действует скидка, указываем обе цены
+            if(count($lpPriceOld) > 0){
+                $lpPrice = strip_tags($productItem->find('div.products-grid-item__price')[0]->innerText);
+                $lpPriceOld = "<s>".$lpPriceOld[0]->innerText."</s>";
+                $dotPos = strpos($lpPrice, ".")+1;
+                $lpPriceNew = substr($lpPrice, $dotPos, strlen($lpPrice) - $dotPos);
+
+                $lpPrice = $lpPriceNew . " " . $lpPriceOld;
+       
+            } else {
+                // если нет, то просто указываем цену
+                $lpPrice = $productItem->find('div.products-grid-item__price')[0]->innerText;
+            }
     
             // если url не равен null, добавляем в сообщение
             if($lpUrl !== null){
 
                 $append = "{$artistName} - {$lpName} \n<i>{$lpCountryAndLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$lpType} {$lpCondition})</i>\n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
-                // $append = $lpParams;
+                // $append = $lpPrice;
 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
