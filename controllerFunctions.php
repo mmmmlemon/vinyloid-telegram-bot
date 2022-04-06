@@ -53,7 +53,7 @@ function checklpsCommand($chatId){
     {
         foreach($notifications as $notification){
 
-            $findResults = parserTest($notification);
+            $findResults = parserPlastinkaCom($notification);
             
             // если результатов поиска больше одного сообщения, то добавляем клавиатуру
             if($findResults === false) {
@@ -157,7 +157,8 @@ function generateProductList($searchText, $pageToShow, $showMessageHeader){
     
     // делаем парсинг информации с сайтов, на выходе получаем массив со страницами готового к отправке текста
     // каждый индекс в массиве - страница = сообщение для Telegram
-    $parseResults = parserTest($searchText);
+    $parseResults = parserPlastinkaCom($searchText);
+    // $parseResults = parserVinylBoxRu($searchText);
     $messageHeader = null;
 
     if($showMessageHeader === true){

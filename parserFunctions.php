@@ -2,7 +2,7 @@
     require "vendor/autoload.php";
     use voku\helper\HtmlDomParser;
     
-    function parserTest($search){
+    function parserPlastinkaCom($search){
 
         $searchText = eraseSpaces($search);
 
@@ -89,6 +89,56 @@
         } else {
             return $arrayOfMessages;
         }
+    }
+
+    function parserVinylBoxRu($search){
+        $searchText = eraseSpaces($search);
+        
+        $html = HtmlDomParser::file_get_html("http://www.vinylbox.ru/search/result?setsearchdata=1&category_id=0&add_desc_in_search=1&search={$searchText}");
+
+        $messageText = "";
+
+        $arrayOfMessages = [];
+
+        // найти все пластинки и добавить в сообщение
+        $table = $html->find('table.product');
+
+        foreach($table as $productItem){
+            // получаем url пластинки
+            $productURL = $productItem->find('a')[0]->href;
+            $productURL = "www.vinylbox.ru".$productURL;
+
+            // получаем имя исполнителя
+            $artistName = $productItem->find('div.name')->find('a')[0]->innerText;
+            $artistName = preg_replace('/\s+/', ' ', $artistName);
+            $albumName = $productItem->find('div.description')[0]->innerText;
+            $albumName = preg_replace('/\s+/', ' ',  $albumName);
+            $lpPrice = $productItem->find('div.jshop_price')[0]->innerText;
+            $lpPrice = preg_replace('/\s+/', '',  $lpPrice);
+
+            if($productURL != null){
+                $append = "{$artistName} - {$albumName} \n<i>Страна/Лейбл</i>\n<b><i>{$lpPrice}</i></b> <i>({Тип пластинки} {Состояние})</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";
+                
+                if(2500 - strlen($messageText) >= strlen($append)){
+                    $messageText .= $append;
+                } else {
+                    $messageText .= $append;
+                    array_push($arrayOfMessages, $messageText);
+                    $messageText = "";
+                }  
+            }
+        }
+
+        if($messageText !== ""){
+            array_push($arrayOfMessages, $messageText);
+        }
+
+        if(count($arrayOfMessages) === 0){
+            return false;
+        } else {
+            return $arrayOfMessages;
+        }
+
     }
     
 ?>
