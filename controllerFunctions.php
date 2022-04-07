@@ -151,23 +151,39 @@ function showitemsCommand($chatId){
 
 // generateProductList
 // делает парсинг пластинок с сайтов и генерирует готовый ответ
-// параметры: searchText - текст для поиска, pageToShow - страница которую нужно показать в сообщении
+// параметры: searchText - текст для поиска, $site - сайт для парсинга ('plastinka', 'vinylbox'), pageToShow - страница которую нужно показать в сообщении
 // showMessageHeader - показать сообщение перед списком пластинок
-function generateProductList($searchText, $pageToShow, $showMessageHeader){
+function generateProductList($searchText, $site, $pageToShow, $showMessageHeader){
     
     // делаем парсинг информации с сайтов, на выходе получаем массив со страницами готового к отправке текста
     // каждый индекс в массиве - страница = сообщение для Telegram
-    $parseResults = parserPlastinkaCom($searchText);
+    $parseResults = null;
+
+    if($site == 'plastinka'){
+        $parseResults = parserPlastinkaCom($searchText);
+    } else if($site == 'vinylbox'){
+        $parseResults = parserVinylBoxRu($searchText);
+    }
+    
     // $parseResults = parserVinylBoxRu($searchText);
     $messageHeader = null;
 
     if($showMessageHeader === true){
-        $messageHeader = "Вот все пластинки которые мне удалось найти 💽";
+
+        switch($site){
+            case 'plastinka':
+                $messageHeader = "plastinka.com";
+                break;
+            case 'vinylbox':
+                $messageHeader = "vinylbox.ru";
+                break;
+        }
     }
 
     // если парсер ничего не нашёл
     if($parseResults == false){
-        $response = "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎";
+        // $response = "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎";
+        $response = false;
         return $response;
     } 
     // если есть результаты
@@ -176,11 +192,14 @@ function generateProductList($searchText, $pageToShow, $showMessageHeader){
         // если список товаров помещается в одном сообщении
         // отправляем ответ без клавиатуры
         if(count($parseResults) === 1){
+            
             $response = [
                 'messageHeader' => $messageHeader,
                 'messageProducts' => $parseResults[0],
                 'keyboard' => false
             ];
+
+
 
             return $response;
         } 

@@ -206,25 +206,60 @@ try {
                 $check = writeCommandLog($message, false);
                 
                 if($check){
-                    // генерируем список товаров на основе введённого текста
-                    $response = generateProductList($message->getText(), 0, true);
+            
+                    // получаем результаты с plastinka.com и выводим
+                    $plastinkaResponse = generateProductList($message->getText(), "plastinka", 0, true);
 
-                    // если ответ пришёл без клавиатуры
-                    if($response['keyboard'] === false){
-                        if($response['messageHeader'] != null){
-                            $bot->sendMessage($id, $response['messageHeader']);
+                    if($plastinkaResponse != false){
+                        // если ответ пришёл без клавиатуры
+                        if($plastinkaResponse['keyboard'] === false){
+                            if($plastinkaResponse['messageHeader'] != null){
+                                $bot->sendMessage($id, $plastinkaResponse['messageHeader']);
+                            }
+                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true);  
+                        } 
+                        // если ответ пришёл с клавиатурой
+                        else if($plastinkaResponse['keyboard'] === true){
+                            if($plastinkaResponse['messageHeader'] != null){
+                                $bot->sendMessage($id, $plastinkaResponse['messageHeader']);
+                            }
+                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
+                        } else {
+                            $bot->sendMessage($id, $plastinkaResponse);  
                         }
-                        $bot->sendMessage($id, $response['messageProducts'], 'HTML', true);  
-                    } 
-                    // если ответ пришёл с клавиатурой
-                    else if($response['keyboard'] === true){
-                        if($response['messageHeader'] != null){
-                            $bot->sendMessage($id, $response['messageHeader']);
-                        }
-                        $bot->sendMessage($id, $response['messageProducts'], 'HTML', true, null, $response['keyboardObject']);  
-                    } else {
-                        $bot->sendMessage($id, $response);  
                     }
+
+            
+
+                    // получаем результаты с vinylbox.ru
+                    // получаем результаты с plastinka.com и выводим
+                    $vinylboxResponse = generateProductList($message->getText(), "vinylbox", 0, true);
+
+                    if($vinylboxResponse != false){
+                        // если ответ пришёл без клавиатуры
+                        if($vinylboxResponse['keyboard'] === false){
+                            if($vinylboxResponse['messageHeader'] != null){
+                                $bot->sendMessage($id, $vinylboxResponse['messageHeader']);
+                            }
+                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true);  
+                        } 
+                        // если ответ пришёл с клавиатурой
+                        else if($vinylboxResponse['keyboard'] === true){
+                            if($vinylboxResponse['messageHeader'] != null){
+                                $bot->sendMessage($id, $vinylboxResponse['messageHeader']);
+                            }
+                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
+                        } else {
+                            $bot->sendMessage($id, $vinylboxResponse);  
+                        }
+                    }
+
+                    if($vinylboxResponse == false && $plastinkaResponse == false){
+                        $bot->sendMessage($id, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
+                    }
+
+              
+
                 } else {
                     $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
                 }
