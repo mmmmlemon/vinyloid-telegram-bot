@@ -92,8 +92,12 @@
     }
 
     function parserVinylBoxRu($search){
-        $searchText = eraseSpaces($search);
+        $searchText = strtolower($search);
+        $searchText = str_replace("the ", "", $searchText);
+        $searchText = eraseSpaces($searchText);
+
         
+
         $html = HtmlDomParser::file_get_html("http://www.vinylbox.ru/search/result?setsearchdata=1&category_id=0&add_desc_in_search=1&search={$searchText}");
 
         $messageText = "";
@@ -115,9 +119,10 @@
             $albumName = preg_replace('/\s+/', ' ',  $albumName);
             $lpPrice = $productItem->find('div.jshop_price')[0]->innerText;
             $lpPrice = preg_replace('/\s+/', '',  $lpPrice);
+            $lpPrice = str_replace(".00", " ", $lpPrice);
 
-            if($productURL != null){
-                $append = "{$artistName} - {$albumName} \n<i>Страна/Лейбл</i>\n<b><i>{$lpPrice}</i></b> <i>({Тип пластинки} {Состояние})</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";
+            if($productURL != null && $artistName != "Книга"){
+                $append = "{$artistName} - {$albumName} \n<i>USA/EMI</i>\n<b><i>{$lpPrice}</i></b> <i>(Переиздание '22 SS/SS)</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";
                 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
