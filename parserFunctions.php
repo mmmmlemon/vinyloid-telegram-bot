@@ -96,8 +96,6 @@
         $searchText = str_replace("the ", "", $searchText);
         $searchText = eraseSpaces($searchText);
 
-        
-
         $html = HtmlDomParser::file_get_html("http://www.vinylbox.ru/search/result?setsearchdata=1&category_id=0&add_desc_in_search=1&search={$searchText}");
 
         $messageText = "";
@@ -115,23 +113,45 @@
             // получаем имя исполнителя
             $artistName = $productItem->find('div.name')->find('a')[0]->innerText;
             $artistName = preg_replace('/\s+/', ' ', $artistName);
+            // получаем название альбома
             $albumName = $productItem->find('div.description')[0]->innerText;
             $albumName = preg_replace('/\s+/', ' ',  $albumName);
+            // получаем цену на пластинку
             $lpPrice = $productItem->find('div.jshop_price')[0]->innerText;
             $lpPrice = preg_replace('/\s+/', '',  $lpPrice);
             $lpPrice = str_replace(".00", " ", $lpPrice);
 
+            // if(strlen($albumCondition) == 2 || strlen($albumCondition) == 3){
+            //     $albumCondition = "{$albumCondition}/{$albumCondition}";
+            // }
+
+            $append = "";
+
             if($productURL != null && $artistName != "Книга"){
-                $append = "{$artistName} - {$albumName} \n<i>USA/EMI</i>\n<b><i>{$lpPrice}</i></b> <i>(Переиздание '22 SS/SS)</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";
+
+                // для того чтобы получить лейбл, состояние пластинки и другую информацию нужно парсить страницу товара
+                $htmlProductPage = HtmlDomParser::file_get_html("http://".$productURL);
+
+                $extraFieldsDiv = $htmlProductPage->find('div.extra_fields');
+                $extraFields = $extraFieldsDiv->find('div');
+
+                $albumYear = substr($extraFields[4]->find('a')[0]->innerText,2,2);
+                $albumLabel = $extraFields[3]->find('a')[0]->innerText;
+                $albumCountry = $extraFields[5]->find('a')[0]->innerText;
+                $albumType = $extraFields[6]->find('a')[0]->innerText;
+                $albumCondition = $extraFields[8]->find('a')[0]->innerText;
+
+                $append = "{$artistName} - {$albumName} '{$albumYear} \n<i>{$albumCountry} / {$albumLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$albumType}, {$albumCondition})</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";
                 
-                if(2500 - strlen($messageText) >= strlen($append)){
-                    $messageText .= $append;
-                } else {
-                    $messageText .= $append;
-                    array_push($arrayOfMessages, $messageText);
-                    $messageText = "";
-                }  
             }
+
+            if(2500 - strlen($messageText) >= strlen($append)){
+                $messageText .= $append;
+            } else {
+                $messageText .= $append;
+                array_push($arrayOfMessages, $messageText);
+                $messageText = "";
+            }  
         }
 
         if($messageText !== ""){

@@ -111,27 +111,87 @@ try {
         $check = writeCommandLog($message, true);
 
         if($check){
-            // получаем результаты
-            $response = checklpsCommand($message->getChat()->getId());
+            
+            $id = $message->getChat()->getId();
 
-            // выводим все сообщения
-            foreach($response as $msg){
-                
-                // если это текстовое сообщение
-                if(gettype($msg) == 'string'){
-                    $bot->sendMessage($message->getChat()->getId(), $msg, 'HTML', true, null);
+            $notifications = checklpsCommand($id);
+
+            $count = 0;
+
+            if($notifications != false){
+
+                foreach($notifications as $notification){
+                    
+                    // получаем результаты с plastinka.com и выводим
+                    $plastinkaResponse = generateProductList($notification, "plastinka", 0, true);
+                    
+                    if($plastinkaResponse != false)
+                    $bot->sendMessage($id, "plastinka.com - {$notification}");  
+
+                    if($plastinkaResponse != false){
+                        // если ответ пришёл без клавиатуры
+                        if($plastinkaResponse['keyboard'] === false){
+                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true);  
+                        } 
+                        // если ответ пришёл с клавиатурой
+                        else if($plastinkaResponse['keyboard'] === true){
+                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
+                        } else {
+                            $bot->sendMessage($id, $plastinkaResponse);  
+                        }
+                    }
+
+                    // получаем результаты с vinylbox.ru
+                    // получаем результаты с plastinka.com и выводим
+                    $vinylboxResponse = generateProductList($notification, "vinylbox", 0, true);
+
+                    if($vinylboxResponse != false)
+                    $bot->sendMessage($id, "vinylbox.ru - {$notification}");  
+
+                    if($vinylboxResponse != false){
+                        // если ответ пришёл без клавиатуры
+                        if($vinylboxResponse['keyboard'] === false){
+                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true);  
+                        } 
+                        // если ответ пришёл с клавиатурой
+                        else if($vinylboxResponse['keyboard'] === true){
+                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
+                        } else {
+                            $bot->sendMessage($id, $vinylboxResponse);  
+                        }
+                    }
                 }
 
-                // если это сообщение с информацией о пластинках
-                else if(gettype($msg) == 'array'){
-                    // выводим сообщение с клавиатурой или без неё
-                    if($msg['keyboard'] === false){
-                        $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true, null);
-                    } else {
-                        $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true,  null , $msg['keyboardObject']);
-                    }  
-                }    
-            } 
+                $count += 1;
+            } else {
+                $bot->sendMessage($id, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");  
+            }
+
+            if($count == 0 && $notifications != false){
+                $bot->sendMessage($id, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
+            }
+
+            // // получаем результаты
+            // $response = checklpsCommand($message->getChat()->getId());
+
+            // // выводим все сообщения
+            // foreach($response as $msg){
+                
+            //     // если это текстовое сообщение
+            //     if(gettype($msg) == 'string'){
+            //         $bot->sendMessage($message->getChat()->getId(), $msg, 'HTML', true, null);
+            //     }
+
+            //     // если это сообщение с информацией о пластинках
+            //     else if(gettype($msg) == 'array'){
+            //         // выводим сообщение с клавиатурой или без неё
+            //         if($msg['keyboard'] === false){
+            //             $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true, null);
+            //         } else {
+            //             $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true,  null , $msg['keyboardObject']);
+            //         }  
+            //     }    
+            // } 
         } else {
             $bot->sendMessage($message->getChat()->getId(), "⚠ Ошибка записи команды в лог ⚠");
         }
@@ -154,13 +214,19 @@ try {
                 
                 // если коллбэк есть, то отправляем запрос на парсинг и показываем страницу соответствующую кнопке
                 $index = strpos($callbackQuery->getData(), '[');
+                $indexEnd = strpos($callbackQuery->getData(), ']');
+                $indexTwo = strpos($callbackQuery->getData(), '(');
+                $indexTwoEnd = strpos($callbackQuery->getData(), ')');
                 // страница
                 $pageToShow = substr($callbackQuery->getData(), 0, $index);
                 // текст для поиска
-                $textForSearch = substr($callbackQuery->getData(), $index + 1, strlen($callbackQuery->getData()) - 3);   
-                
+                $textForSearch = substr($callbackQuery->getData(), $index+1, $indexEnd-2);   
+                // сайт
+                $site = substr($callbackQuery->getData(), $indexTwo+1, $indexTwoEnd);   
+                $site = str_replace(')', '', $site);
+
                 // генерируем список товаров на основе введённого текста
-                $response = generateProductList($textForSearch, $pageToShow, false);
+                $response = generateProductList($textForSearch, $site, $pageToShow, true);
 
                 $id = $callbackQuery->getMessage()->getChat()->getId();
 
@@ -229,8 +295,6 @@ try {
                         }
                     }
 
-            
-
                     // получаем результаты с vinylbox.ru
                     // получаем результаты с plastinka.com и выводим
                     $vinylboxResponse = generateProductList($message->getText(), "vinylbox", 0, true);
@@ -258,7 +322,6 @@ try {
                         $bot->sendMessage($id, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
                     }
 
-              
 
                 } else {
                     $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");

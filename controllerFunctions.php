@@ -42,67 +42,20 @@ function findCommand(){
 }
 
 // checklps
+// получает список пластинок\артистов которые нужно проверить и возвращает в index.php
 function checklpsCommand($chatId){
     $messages = [];
     $notifications = getNotifications($chatId);
 
     if(count($notifications) == 0){
-        array_push($messages, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");
+        return false;
+        // array_push($messages, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");
     } 
     else 
-    {
-        foreach($notifications as $notification){
-
-            $findResults = parserPlastinkaCom($notification);
-            
-            // если результатов поиска больше одного сообщения, то добавляем клавиатуру
-            if($findResults === false) {
-                //
-            }
-            else if(count($findResults) > 1){
-                
-                // кнопки клавиатуры
-                $keyboardButtons = [];
-
-                for($i = 0; $i < count($findResults); $i++){
-                    $pageNumForButton = $i + 1;
-                    if($i == $pageToShow){
-                        $pageNumForButton = "- ".strval($pageNumForButton)." -";
-                    }
-                
-                    array_push($keyboardButtons, ['text' => "{$pageNumForButton}", 
-                                                'callback_data' => "{$i}[{$notification}]"]);
-                }
-
-                $keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup([$keyboardButtons]);
-
-                $response = [
-                    'message' => $findResults[0],
-                    'keyboard' => true,
-                    'keyboardObject' => $keyboard
-                ]; 
-                
-                array_push($messages, $response);
-            } else {
-                // если результатов на одно сообщение, то добавляем текст сообщения без клавиатуры
-                $response = [
-                    'message' => $findResults[0],
-                    'keyboard' => false,
-                ]; 
-
-                array_push($messages, $response);
-            }
-
-        }
-    
-        if(count($messages) > 0){
-            array_unshift($messages, "Вот все пластинки которые мне удалось найти 💽");
-        } else {
-            array_push($messages, "По запросам не найдено ни одной пластинки.");
-        }
+    {   
+        return $notifications;
     }
 
-    return $messages;
 }
 
 // additem
@@ -217,7 +170,7 @@ function generateProductList($searchText, $site, $pageToShow, $showMessageHeader
                 }
             
                 array_push($keyboardButtons, ['text' => "{$pageNumForButton}", 
-                                            'callback_data' => "{$i}[{$searchText}]"]);
+                                            'callback_data' => "{$i}[{$searchText}]({$site})"]);
             }
 
             $keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup([$keyboardButtons]);
