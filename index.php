@@ -75,6 +75,7 @@ try {
         }
     });
 
+    // команда deleteitem
     $bot->command('deleteitem', function($message) use ($bot){
         // записать команду в лог
         $check = writeCommandLog($message, true);
@@ -82,12 +83,9 @@ try {
         if($check){
             $response = deleteitemCommand($message->getChat()->getId());
 
-            foreach($response as $msg){
-                $bot->sendMessage($message->getChat()->getId(), $msg);    
+            foreach($response as $deleteItem){
+                $bot->sendMessage($message->getChat()->getId(), $deleteItem);    
             }
-
-            
-            // $bot->sendMessage($message->getChat()->getId(), $response['message'], null, false, null, $response['keyboardObject']);
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
         }
