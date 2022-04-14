@@ -117,16 +117,20 @@ try {
             $notifications = checklpsCommand($id);
 
             $count = 0;
+            $countOld = 0;
 
             if($notifications != false){
 
+                $bot->sendMessage($id, "Начинаю поиск пластинок по списку... 🔎\n\n🔽Нижё - всё что я найду🔽");  
+
                 foreach($notifications as $notification){
+                    $countOld = $count;
                     
                     // получаем результаты с plastinka.com и выводим
                     $plastinkaResponse = generateProductList($notification, "plastinka", 0, true);
                     
                     if($plastinkaResponse != false)
-                    $bot->sendMessage($id, "plastinka.com - {$notification}");  
+                    $bot->sendMessage($id, "plastinka.com - <b>{$notification}</b>", 'HTML');  
 
                     if($plastinkaResponse != false){
                         // если ответ пришёл без клавиатуры
@@ -139,14 +143,15 @@ try {
                         } else {
                             $bot->sendMessage($id, $plastinkaResponse);  
                         }
-                    }
+                        $count += 1;
+                    } 
 
                     // получаем результаты с vinylbox.ru
                     // получаем результаты с plastinka.com и выводим
                     $vinylboxResponse = generateProductList($notification, "vinylbox", 0, true);
 
                     if($vinylboxResponse != false)
-                    $bot->sendMessage($id, "vinylbox.ru - {$notification}");  
+                    $bot->sendMessage($id, "vinylbox.ru - <b>{$notification}</b>", 'HTML');  
 
                     if($vinylboxResponse != false){
                         // если ответ пришёл без клавиатуры
@@ -159,16 +164,26 @@ try {
                         } else {
                             $bot->sendMessage($id, $vinylboxResponse);  
                         }
+                        $count += 1;
                     }
+
+                    if($countOld === $count){
+                        if($plastinkaResponse == false && $vinylboxResponse == false){
+                            $bot->sendMessage($id, "<b>{$notification}</b>\n\nПластинок не найдено.", 'HTML');
+                        }    
+                    }
+                    
                 }
 
-                $count += 1;
+                
             } else {
                 $bot->sendMessage($id, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");  
             }
 
             if($count == 0 && $notifications != false){
-                $bot->sendMessage($id, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
+                $bot->sendMessage($id, "Не найдено ни одной пластинки из списка. Используйте команду /find чтобы найти что-то другое 🔎");  
+            } else if ($count > 0 && $notifications != false){
+                $bot->sendMessage($id, "🔼 Это все что удалось найти 🔼");  
             }
 
             // // получаем результаты
@@ -209,7 +224,7 @@ try {
 
             //записать команду в лог
             $check = writeCommandLog($callbackQuery->getMessage(), false);
-
+            
             if($check){
                 
                 // если коллбэк есть, то отправляем запрос на парсинг и показываем страницу соответствующую кнопке

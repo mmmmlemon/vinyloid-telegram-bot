@@ -23,6 +23,7 @@
             $artistName = $aTagWithURL->innerText;
             // получаем название пластинки
             $lpName = $productItem->find('div.products-grid-item__title')->find('a')[0]->innerText;
+            
             // получаем характеристики пластинки
             $lpParams = $productItem->find('div.products-grid-item__params')->find('a')[0]->innerText;
 
@@ -68,7 +69,6 @@
             if($lpUrl !== null){
 
                 $append = "{$artistName} - {$lpName} \n<i>{$lpCountryAndLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$lpType} {$lpCondition})</i>\n<a href='https://plastinka.com{$lpUrl}'><b>Перейти на сайт</b></a>\n\n";
-                // $append = $lpPrice;
 
                 if(2500 - strlen($messageText) >= strlen($append)){
                     $messageText .= $append;
