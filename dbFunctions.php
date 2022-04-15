@@ -39,7 +39,7 @@ function writeCommandToDatabase($command_name, $chat_id){
 }
 
 // записать уведомление в БД
-function writeNotificationToDatabase($chatId, $item){
+function addListItemToDatabase($chatId, $item){
 
 	$connection = connectToDatabase();
 	$sql = "INSERT INTO notifications (chat_id, search_text)
@@ -54,7 +54,7 @@ function writeNotificationToDatabase($chatId, $item){
 }
 
 // проверить наличие уведомления перед удалением
-function checkItemBeforeDelete($chatId, $item){
+function checkListItemBeforeDelete($chatId, $item){
     $connection = connectToDatabase();
 	$sql = "SELECT chat_id, search_text FROM notifications WHERE chat_id = '{$chatId}' AND search_text = '{$item}'";
 	$response = $connection->query($sql);
@@ -71,8 +71,7 @@ function checkItemBeforeDelete($chatId, $item){
 }
 
 // удалить уведомление из БД
-function deleteNotificationFromDatabase($chatId, $item){
-
+function deleteListItemFromDatabase($chatId, $item){
 	$connection = connectToDatabase();
 	$sql = "DELETE FROM notifications WHERE chat_id = '{$chatId}' AND search_text = '{$item}'";
 	if($connection->query($sql) === TRUE){
@@ -82,25 +81,19 @@ function deleteNotificationFromDatabase($chatId, $item){
 	}
 
 	$connection->close();
-
 }
 
 // получить последнюю команду из БД
 function getLatestCommand($chat_id){
-
 	$connection = connectToDatabase();
-	
 	$sql = "SELECT command_name, chat_id FROM command_log WHERE chat_id = {$chat_id} ORDER BY timestamp DESC";
-
 	$response = $connection->query($sql);
-
 	$latestCommandName = $response->fetch_assoc()['command_name'];
-
 	return $latestCommandName;
 }
 
-// получить уведомления о пластинках (TO DO)
-function getNotifications($chatId){
+// получить уведомления о пластинках
+function getList($chatId){
 
 	$connection = connectToDatabase();
 	$sql = "SELECT chat_id, search_text FROM notifications WHERE chat_id = '{$chatId}'";

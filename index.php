@@ -63,12 +63,12 @@ try {
     });
 
     // команда additem
-    $bot->command('additem', function($message) use ($bot){ 
+    $bot->command('addlist', function($message) use ($bot){ 
         //записать команду в лог
         $check = writeCommandLog($message, true);
 
         if($check){
-            $response = additemCommand();
+            $response = addlistCommand();
             $bot->sendMessage($message->getChat()->getId(),  $response, 'HTML');
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
@@ -76,15 +76,15 @@ try {
     });
 
     // команда deleteitem
-    $bot->command('deleteitem', function($message) use ($bot){
+    $bot->command('deletelist', function($message) use ($bot){
         // записать команду в лог
         $check = writeCommandLog($message, true);
 
         if($check){
-            $response = deleteitemCommand($message->getChat()->getId());
+            $response = deletelistCommand($message->getChat()->getId());
 
             foreach($response as $deleteItem){
-                $bot->sendMessage($message->getChat()->getId(), $deleteItem);    
+                $bot->sendMessage($message->getChat()->getId(), $deleteItem, 'HTML');    
             }
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
@@ -92,119 +92,110 @@ try {
     });
 
     // команда showitems
-    $bot->command('showitems', function($message) use ($bot){
+    $bot->command('showlist', function($message) use ($bot){
         //записать команду в лог
         $check = writeCommandLog($message, true);
 
         if($check){
-            $response = showitemsCommand($message->getChat()->getId());
+            $response = showlistCommand($message->getChat()->getId());
             $bot->sendMessage($message->getChat()->getId(),  $response, 'HTML');
         } else {
             $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
         }
     });
 
-      // команда checklps
-      $bot->command('checklps', function($message) use ($bot){
+    // команда findlist
+    $bot->command('findlist', function($message) use ($bot){
+
+        // записать команду в лог
         $check = writeCommandLog($message, true);
 
         if($check){
             
-            $id = $message->getChat()->getId();
+        //     // id
+            $chatId = $message->getChat()->getId();
 
-            $notifications = checklpsCommand($id);
+            // получаем список исполнителей и альбомов для поиска
+            $searchList = checklpsCommand($chatId);
 
+            // переменные для подсчёта найденных пластинок
             $count = 0;
-            $countOld = 0;
+            $countCopy = 0;
 
-            if($notifications != false){
+            // если список не пустой
+            if($searchList != false){
+                
+                // сообщение в начале
+                $bot->sendMessage($chatId, "Начинаю поиск пластинок по списку... 🔎\n\n🔽Нижё - всё что я найду🔽");  
 
-                $bot->sendMessage($id, "Начинаю поиск пластинок по списку... 🔎\n\n🔽Нижё - всё что я найду🔽");  
+                // проверяем каждый пункт списка по всем сайтам
+                foreach($searchList as $listItem){
 
-                foreach($notifications as $notification){
-                    $countOld = $count;
+                    $countCopy = $count;
                     
                     // получаем результаты с plastinka.com и выводим
-                    $plastinkaResponse = generateProductList($notification, "plastinka", 0, true);
+                    $plastinkaResponse = generateProductList($listItem, "plastinka", 0, true);
                     
                     if($plastinkaResponse != false)
-                    $bot->sendMessage($id, "plastinka.com - <b>{$notification}</b>", 'HTML');  
+                    { $bot->sendMessage($chatId, "plastinka.com - <b>{$listItem}</b>", 'HTML'); }
 
                     if($plastinkaResponse != false){
-                        // если ответ пришёл без клавиатуры
-                        if($plastinkaResponse['keyboard'] === false){
-                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true);  
-                        } 
-                        // если ответ пришёл с клавиатурой
-                        else if($plastinkaResponse['keyboard'] === true){
-                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
-                        } else {
-                            $bot->sendMessage($id, $plastinkaResponse);  
+                        switch($plastinkaResponse['keyboard']){
+                             // если ответ пришёл без клавиатуры
+                            case false:
+                                $bot->sendMessage($chatId, $plastinkaResponse['messageProducts'], 'HTML', true);  
+                                break;
+                            // если с клавиатурой
+                            case true:
+                                $bot->sendMessage($chatId, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
+                                break;
+                            default:
+                                $bot->sendMessage($chatId, $plastinkaResponse);  
                         }
+
                         $count += 1;
                     } 
 
-                    // получаем результаты с vinylbox.ru
-                    // получаем результаты с plastinka.com и выводим
-                    $vinylboxResponse = generateProductList($notification, "vinylbox", 0, true);
+                    // получаем результаты с vinylbox.ru и выводим
+                    $vinylboxResponse = generateProductList($listItem, "vinylbox", 0, true);
 
                     if($vinylboxResponse != false)
-                    $bot->sendMessage($id, "vinylbox.ru - <b>{$notification}</b>", 'HTML');  
+                    { $bot->sendMessage($chatId, "vinylbox.ru - <b>{$listItem}</b>", 'HTML'); }
 
                     if($vinylboxResponse != false){
-                        // если ответ пришёл без клавиатуры
-                        if($vinylboxResponse['keyboard'] === false){
-                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true);  
-                        } 
-                        // если ответ пришёл с клавиатурой
-                        else if($vinylboxResponse['keyboard'] === true){
-                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
-                        } else {
-                            $bot->sendMessage($id, $vinylboxResponse);  
+                        switch($vinylboxResponse['keyboard']){
+                            // если ответ пришёл без клавиатуры
+                            case false:
+                                $bot->sendMessage($chatId, $vinylboxResponse['messageProducts'], 'HTML', true);  
+                                break;
+                            // если ответ пришёл с клавиатурой
+                            case true:
+                                $bot->sendMessage($chatId, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
+                                break;
+                            default:
+                                $bot->sendMessage($chatId, $vinylboxResponse); 
                         }
                         $count += 1;
                     }
 
-                    if($countOld === $count){
+                    if($countCopy === $count){
                         if($plastinkaResponse == false && $vinylboxResponse == false){
-                            $bot->sendMessage($id, "<b>{$notification}</b>\n\nПластинок не найдено.", 'HTML');
+                            $bot->sendMessage($chatId, "<b>{$listItem}</b>\n\nПластинок не найдено.", 'HTML');
                         }    
-                    }
-                    
+                    }  
                 }
 
-                
             } else {
-                $bot->sendMessage($id, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");  
+                $bot->sendMessage($chatId, "Нет пластинок или артистов для проверки. Добавьте их через команду /addlist");  
+            }
+            
+            // сообщение в конце
+            if($count == 0 && $searchList != false){
+                $bot->sendMessage($chatId, "Не найдено ни одной пластинки из списка. Используйте команду /find чтобы найти что-то другое 🔎");  
+            } else if ($count > 0 && $searchList != false){
+                $bot->sendMessage($chatId, "🔼 Это все что удалось найти. 🔼\n\n Всего найдено найдено пластинок: {$count} ");  
             }
 
-            if($count == 0 && $notifications != false){
-                $bot->sendMessage($id, "Не найдено ни одной пластинки из списка. Используйте команду /find чтобы найти что-то другое 🔎");  
-            } else if ($count > 0 && $notifications != false){
-                $bot->sendMessage($id, "🔼 Это все что удалось найти 🔼");  
-            }
-
-            // // получаем результаты
-            // $response = checklpsCommand($message->getChat()->getId());
-
-            // // выводим все сообщения
-            // foreach($response as $msg){
-                
-            //     // если это текстовое сообщение
-            //     if(gettype($msg) == 'string'){
-            //         $bot->sendMessage($message->getChat()->getId(), $msg, 'HTML', true, null);
-            //     }
-
-            //     // если это сообщение с информацией о пластинках
-            //     else if(gettype($msg) == 'array'){
-            //         // выводим сообщение с клавиатурой или без неё
-            //         if($msg['keyboard'] === false){
-            //             $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true, null);
-            //         } else {
-            //             $bot->sendMessage($message->getChat()->getId(), $msg['message'], 'HTML', true,  null , $msg['keyboardObject']);
-            //         }  
-            //     }    
-            // } 
         } else {
             $bot->sendMessage($message->getChat()->getId(), "⚠ Ошибка записи команды в лог ⚠");
         }
@@ -213,7 +204,6 @@ try {
     
     //Текстовые сообщения и коллбэки
     $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot) {
-
         // проверяем коллбэки
         $callbackQuery = $update->getCallbackQuery();
 
@@ -224,7 +214,6 @@ try {
             $check = writeCommandLog($callbackQuery->getMessage(), false);
             
             if($check){
-                
                 // если коллбэк есть, то отправляем запрос на парсинг и показываем страницу соответствующую кнопке
                 $index = strpos($callbackQuery->getData(), '[');
                 $indexEnd = strpos($callbackQuery->getData(), ']');
@@ -236,28 +225,31 @@ try {
                 $textForSearch = substr($callbackQuery->getData(), $index+1, $indexEnd-2);   
                 // сайт
                 $site = substr($callbackQuery->getData(), $indexTwo+1, $indexTwoEnd);   
+                // wtf, последняя скобка в конце почему-то всегда попадает в substr какой-бы последний индекс я не указывал, поэтому стираю через str_replace
                 $site = str_replace(')', '', $site);
 
                 // генерируем список товаров на основе введённого текста
                 $response = generateProductList($textForSearch, $site, $pageToShow, true);
 
-                $id = $callbackQuery->getMessage()->getChat()->getId();
+                $chatId = $callbackQuery->getMessage()->getChat()->getId();
 
-                // если ответ пришёл без клавиатуры
-                if($response['keyboard'] === false){
-                    if($response['messageHeader'] != null){
-                        $bot->sendMessage($id, $response['messageHeader']);
-                    }
-                    $bot->sendMessage($id, $response['messageProducts'], 'HTML', true);  
-                } 
-                // если ответ пришёл с клавиатурой
-                else if($response['keyboard'] === true){
-                    if($response['messageHeader'] != null){
-                        $bot->sendMessage($id, $response['messageHeader']);
-                    }
-                    $bot->sendMessage($id, $response['messageProducts'], 'HTML', true, null, $response['keyboardObject']);  
-                } else {
-                    $bot->sendMessage($id, $response);  
+                switch($response['keyboard']){
+                    // если ответ без клавиатуры
+                    case false:
+                        if($response['messageHeader'] != null){
+                            $bot->sendMessage($chatId, $response['messageHeader']);
+                        }
+                        $bot->sendMessage($chatId, $response['messageProducts'], 'HTML', true); 
+                        break;
+                    // если ответ c клавиатурой
+                    case true:
+                        if($response['messageHeader'] != null){
+                            $bot->sendMessage($chatId, $response['messageHeader']);
+                        }
+                        $bot->sendMessage($chatId, $response['messageProducts'], 'HTML', true, null, $response['keyboardObject']);  
+                        break;
+                    default:
+                        $bot->sendMessage($chatId, $response); 
                 }
 
                 $bot->answerCallbackQuery(
@@ -273,38 +265,40 @@ try {
             $message = $update->getMessage();
 
             // получение id чата
-            $id = $message->getChat()->getId();
+            $chatId = $message->getChat()->getId();
 
             // получение последней использованной команды
-            $latestCommand = getLatestCommand($id);
+            $latestCommand = getLatestCommand($chatId);
 
             // выполнения действия с введённым текстом в зависимости от последней записанной в лог команды
             // если последняя команда была /find, то ищем пластинки на основе введённого текста
             if($latestCommand === "/find"){
-                // запись команды NULL в лог
+                // запись команды text_input в лог
                 $check = writeCommandLog($message, false);
                 
                 if($check){
-            
                     // получаем результаты с plastinka.com и выводим
                     $plastinkaResponse = generateProductList($message->getText(), "plastinka", 0, true);
 
                     if($plastinkaResponse != false){
-                        // если ответ пришёл без клавиатуры
-                        if($plastinkaResponse['keyboard'] === false){
-                            if($plastinkaResponse['messageHeader'] != null){
-                                $bot->sendMessage($id, $plastinkaResponse['messageHeader']);
-                            }
-                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true);  
-                        } 
-                        // если ответ пришёл с клавиатурой
-                        else if($plastinkaResponse['keyboard'] === true){
-                            if($plastinkaResponse['messageHeader'] != null){
-                                $bot->sendMessage($id, $plastinkaResponse['messageHeader']);
-                            }
-                            $bot->sendMessage($id, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
-                        } else {
-                            $bot->sendMessage($id, $plastinkaResponse);  
+                        switch($plastinkaResponse['keyboard']){
+                            // если ответ пришёл без клавиатуры
+                            case false:
+                                if($plastinkaResponse['messageHeader'] != null){
+                                    $bot->sendMessage($chatId, $plastinkaResponse['messageHeader']);
+                                }
+                                $bot->sendMessage($chatId, $plastinkaResponse['messageProducts'], 'HTML', true);  
+                                break;
+                            // если ответ пришёл с клавиатурой
+                            case true:
+                                if($plastinkaResponse['messageHeader'] != null){
+                                    $bot->sendMessage($chatId, $plastinkaResponse['messageHeader']);
+                                }
+                                $bot->sendMessage($chatId, $plastinkaResponse['messageProducts'], 'HTML', true, null, $plastinkaResponse['keyboardObject']);  
+                                break;
+                            default:
+                                $bot->sendMessage($chatId, $plastinkaResponse);  
+                                break;
                         }
                     }
 
@@ -313,66 +307,62 @@ try {
                     $vinylboxResponse = generateProductList($message->getText(), "vinylbox", 0, true);
 
                     if($vinylboxResponse != false){
-                        // если ответ пришёл без клавиатуры
-                        if($vinylboxResponse['keyboard'] === false){
-                            if($vinylboxResponse['messageHeader'] != null){
-                                $bot->sendMessage($id, $vinylboxResponse['messageHeader']);
-                            }
-                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true);  
-                        } 
-                        // если ответ пришёл с клавиатурой
-                        else if($vinylboxResponse['keyboard'] === true){
-                            if($vinylboxResponse['messageHeader'] != null){
-                                $bot->sendMessage($id, $vinylboxResponse['messageHeader']);
-                            }
-                            $bot->sendMessage($id, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
-                        } else {
-                            $bot->sendMessage($id, $vinylboxResponse);  
+                        switch($vinylboxResponse['keyboard']){
+                            // если ответ пришёл без клавиатуры
+                            case false:
+                                if($vinylboxResponse['messageHeader'] != null){
+                                    $bot->sendMessage($chatId, $vinylboxResponse['messageHeader']);
+                                }
+                                $bot->sendMessage($chatId, $vinylboxResponse['messageProducts'], 'HTML', true);  
+                                break;
+                            // если ответ пришёл с клавиатурой
+                            case true:
+                                if($vinylboxResponse['messageHeader'] != null){
+                                    $bot->sendMessage($chatId, $vinylboxResponse['messageHeader']);
+                                }
+                                $bot->sendMessage($chatId, $vinylboxResponse['messageProducts'], 'HTML', true, null, $vinylboxResponse['keyboardObject']);  
+                                break;
+                            default:
+                                $bot->sendMessage($chatId, $vinylboxResponse);  
                         }
                     }
 
                     if($vinylboxResponse == false && $plastinkaResponse == false){
-                        $bot->sendMessage($id, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
+                        $bot->sendMessage($chatId, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
                     }
-
-
                 } else {
                     $bot->sendMessage($message->getChat()->getId(),  "⚠ Ошибка записи команды в лог ⚠");
                 }
             } 
             
-            else if($latestCommand === "/additem"){
-                // запись команды NULL в лог
+            else if($latestCommand === "/addlist"){
+                // запись команды text_input в лог
                 $check = writeCommandLog($message, false);
 
                 if($check){
-                    // генерируем список товаров на основе введённого текста
-                    $response = addNotification($message->getChat()->getId(), $message->getText());
+                    // запсиваем новый пункт списка в БД
+                    $response = addItemToList($message->getChat()->getId(), $message->getText());
                     $bot->sendMessage($message->getChat()->getId(), $response, 'HTML');
                 }
             }
 
-            else if ($latestCommand === "/deleteitem"){
-
-                // запись команды NULL в лог
+            else if ($latestCommand === "/deletelist"){
+                // запись команды text_input в лог
                 $check = writeCommandLog($message, false);
 
                 if($check){
-                    // генерируем список товаров на основе введённого текста
-                    $response = deleteNotification($message->getChat()->getId(), $message->getText());
+                    // удаляем пункт списка из БД
+                    $response = deleteItemFromList($message->getChat()->getId(), $message->getText());
                     $bot->sendMessage($message->getChat()->getId(), $response, 'HTML');
                 }
-         
-            }
-            
+            }  
             else {
-                // запись команды NULL в лог
+                // запись команды text_input в лог
                 writeCommandLog($message, false);
                 $bot->sendMessage($id, 'Пожалуйста, напишите команду. Список команд можно посмотреть в /help');
             }
-
         }
-    
+        
     }, function () {
         return true;
     });
