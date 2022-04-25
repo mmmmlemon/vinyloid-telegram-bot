@@ -6,7 +6,7 @@
     function parserPlastinkaCom($search){
 
         // заменяем пробелы на '%20' чтобы вставить текст для поиска в ссылку
-        $searchText = formatSpaces($search);
+        $searchText = formatSpaces($search, '%20');
 
         $html = HtmlDomParser::file_get_html("https://plastinka.com/lp/search?str={$searchText}&params=%7B%22styles%22:%5B%5D,%22labels%22:%5B%5D,%22countries%22:%5B%5D,%22price_from%22:0,%22price_to%22:0,%22record_year_from%22:0,%22record_year_to%22:%222022%22,%22release_year_from%22:0,%22release_year_to%22:2022,%22types%22:%5B%5D,%22sort%22:%22artist%22,%22view_type%22:%22grid%22,%22page%22:1,%22per_page%22:10%7D");
     
@@ -100,7 +100,7 @@
         // приводим символы к lowercase, убираем the в начале (т.к оно ломает поиск), заменяем пробелы на '%20'
         $searchText = strtolower($search);
         $searchText = str_replace("the ", "", $searchText);
-        $searchText = formatSpaces($searchText);
+        $searchText = formatSpaces($searchText, '%20');
 
         $html = HtmlDomParser::file_get_html("http://www.vinylbox.ru/search/result?setsearchdata=1&category_id=0&add_desc_in_search=1&search={$searchText}");
 
@@ -173,5 +173,82 @@
         }
 
     }
+
+    // парсинг результатов с vinyl.ru
+    function parserVinylRu($search){
+        $searchText = strtolower($search);
+        $searchText = str_replace("the ", "", $searchText);
+        $searchText = formatSpaces($searchText, "-");
+
+        $html = HtmlDomParser::file_get_html("https://vinyl.ru/catalog/author/{$searchText}/");
+
+        $messageText = "";
+
+        $arrayOfMessages = [];
+
+        // найти все пластинки и добавить в сообщение
+
+        $productsDiv = $html->find('div.album');
+
+        foreach($productsDiv as $product){
+            $albumTitleBlock = $product->find('h4.album_title');
+            $productUrl = "https://vinyl.ru".$albumTitleBlock->find('a')[0]->href;
+            
+            $productHtml = HtmlDomParser::file_get_html($productUrl);
+
+            $artistName = $productHtml->find('h4.card_subtitle')[0]->innerText;
+            $albumName = $productHtml->find('h1.card_title')[0]->innerText;
+
+            $extraInfoUl = $productHtml->find('ul.card-summary')[0];
+
+            $extraInfoLi = $extraInfoUl->find('li');
+
+            $albumCountry = str_replace("Страна: ", "", strip_tags($extraInfoLi[7]->innerText));
+            $albumLabel = strip_tags($extraInfoLi[3]->innerText);
+            $pos = strpos($albumLabel, "Лейбл:")+12;
+            $albumLabel = substr($albumLabel, $pos, strlen($albumLabel));
+
+            $lpPrice = $product->find('span.price_current')[0]->innerText;
+
+            $albumYear = substr(str_replace("Год релиза альбома: ", "", strip_tags($extraInfoLi[0]->innerText)), 2, 2);
+            $lpYear = substr(str_replace("Год выпуска пластинки: ", "", strip_tags($extraInfoLi[1]->innerText)), 2, 2);
+
+            $albumType = null;
+
+            if($albumYear == $lpYear){
+                $albumType = "Оригинал";
+            } else if ($albumYear != $lpYear){
+                $albumType = "Переиздание '{$lpYear}";
+            }
+
+            $albumCondition = str_replace("Состояние: ", "", strip_tags($extraInfoLi[6]->innerText));
+
+            $append = "";
+
+            if($productUrl != null){
+                $append = "{$artistName} - {$albumName} '{$albumYear} \n<i>{$albumCountry} / {$albumLabel} </i>\n<b><i>{$lpPrice}</i></b>, <i>({$albumType}, {$albumCondition})</i>\n<a href='{$productUrl}'><b>Перейти на сайт</b></a>\n\n";
+            }
+
+            if(2500 - strlen($messageText) >= strlen($append)){
+                $messageText .= $append;
+            } else {
+                $messageText .= $append;
+                array_push($arrayOfMessages, $messageText);
+                $messageText = "";
+            } 
+        }
+
+        if($messageText !== ""){
+            array_push($arrayOfMessages, $messageText);
+        }
+
+        if(count($arrayOfMessages) === 0){
+            return false;
+        } else {
+            return $arrayOfMessages;
+        }
+
+    }
+
     
 ?>

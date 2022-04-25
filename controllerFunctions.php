@@ -104,6 +104,8 @@ function generateProductList($searchText, $site, $pageToShow, $showMessageHeader
         $parseResults = parserPlastinkaCom($searchText);
     } else if($site == 'vinylbox'){
         $parseResults = parserVinylBoxRu($searchText);
+    } else if ($site == 'vinylru'){
+        $parseResults = parserVinylRu($searchText);
     }
     
     // $parseResults = parserVinylBoxRu($searchText);
@@ -117,6 +119,9 @@ function generateProductList($searchText, $site, $pageToShow, $showMessageHeader
                 break;
             case 'vinylbox':
                 $messageHeader = "vinylbox.ru";
+                break;
+            case 'vinylru':
+                $messageHeader = "vinyl.ru";
                 break;
         }
     }

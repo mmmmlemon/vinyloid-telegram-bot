@@ -306,8 +306,7 @@ try {
                         }
                     }
 
-                    // получаем результаты с vinylbox.ru
-                    // получаем результаты с plastinka.com и выводим
+                    // получаем результаты с vinylbox.ru и выводим
                     $vinylboxResponse = generateProductList($message->getText(), "vinylbox", 0, true);
 
                     if($vinylboxResponse != false){
@@ -332,7 +331,32 @@ try {
                         }
                     }
 
-                    if($vinylboxResponse == false && $plastinkaResponse == false){
+                    // получаем результаты с vinyl.ru и выводим
+                    // $vinylruResponse = generateProductList($message->getText(), "vinylru", 0, true);
+                    // // $bot->sendMessage($chatId, $vinylruResponse[0], 'HTML', true);
+                    // if($vinylruResponse != false){
+                    //     switch($vinylruResponse['keyboard']){
+                    //         // если ответ пришёл без клавиатуры
+                    //         case false:
+                    //             if($vinylruResponse['messageHeader'] != null){
+                    //                 $bot->sendMessage($chatId, $vinylruResponse['messageHeader']);
+                    //             }
+                    //             $bot->sendMessage($chatId, $vinylruResponse['messageProducts'], 'HTML', true);  
+                    //             break;
+                    //         // если ответ пришёл с клавиатурой
+                    //         case true:
+                    //             if($vinylruResponse['messageHeader'] != null){
+                    //                 $bot->sendMessage($chatId, $vinylruResponse['messageHeader']);
+                    //             }
+                    //             $bot->sendMessage($chatId, $vinylruResponse['messageProducts'], 'HTML', true, null, $vinylruResponse['keyboardObject']);  
+                    //             break;
+                    //         default:
+                    //             $bot->sendMessage($chatId, $vinylruResponse);  
+                    //     }
+                    // }
+                    
+
+                    if($vinylboxResponse == false && $plastinkaResponse == false && $vinylruResponse == false){
                         $bot->sendMessage($chatId, "По запросу не найдено ни одной пластинки. Используйте команду /find чтобы найти что-то другое 🔎");  
                     } else {
                         $bot->sendMessage($chatId, "🔼 Это все что удалось найти. 🔼\n\n");  
