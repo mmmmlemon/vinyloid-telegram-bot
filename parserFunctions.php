@@ -2,9 +2,11 @@
     require "vendor/autoload.php";
     use voku\helper\HtmlDomParser;
     
+    // парсинг результатов с plastinka.com
     function parserPlastinkaCom($search){
 
-        $searchText = eraseSpaces($search);
+        // заменяем пробелы на '%20' чтобы вставить текст для поиска в ссылку
+        $searchText = formatSpaces($search);
 
         $html = HtmlDomParser::file_get_html("https://plastinka.com/lp/search?str={$searchText}&params=%7B%22styles%22:%5B%5D,%22labels%22:%5B%5D,%22countries%22:%5B%5D,%22price_from%22:0,%22price_to%22:0,%22record_year_from%22:0,%22record_year_to%22:%222022%22,%22release_year_from%22:0,%22release_year_to%22:2022,%22types%22:%5B%5D,%22sort%22:%22artist%22,%22view_type%22:%22grid%22,%22page%22:1,%22per_page%22:10%7D");
     
@@ -91,10 +93,14 @@
         }
     }
 
+    // парсинг результатов с vinylbox.ru
     function parserVinylBoxRu($search){
+
+        // форматируем текст для поиска в нужный формат
+        // приводим символы к lowercase, убираем the в начале (т.к оно ломает поиск), заменяем пробелы на '%20'
         $searchText = strtolower($search);
         $searchText = str_replace("the ", "", $searchText);
-        $searchText = eraseSpaces($searchText);
+        $searchText = formatSpaces($searchText);
 
         $html = HtmlDomParser::file_get_html("http://www.vinylbox.ru/search/result?setsearchdata=1&category_id=0&add_desc_in_search=1&search={$searchText}");
 
@@ -121,12 +127,9 @@
             $lpPrice = preg_replace('/\s+/', '',  $lpPrice);
             $lpPrice = str_replace(".00", " ", $lpPrice);
 
-            // if(strlen($albumCondition) == 2 || strlen($albumCondition) == 3){
-            //     $albumCondition = "{$albumCondition}/{$albumCondition}";
-            // }
-
             $append = "";
 
+            // в поиске по сайту бывает попадаются книги, у всех них в теге вместо имени исполнителя указано "Книга", эти результаты убираем из поиска
             if($productURL != null && $artistName != "Книга"){
 
                 // для того чтобы получить лейбл, состояние пластинки и другую информацию нужно парсить страницу товара
@@ -135,10 +138,15 @@
                 $extraFieldsDiv = $htmlProductPage->find('div.extra_fields');
                 $extraFields = $extraFieldsDiv->find('div');
 
+                // получаем год 
                 $albumYear = substr($extraFields[4]->find('a')[0]->innerText,2,2);
+                // лейбл
                 $albumLabel = $extraFields[3]->find('a')[0]->innerText;
+                // страна
                 $albumCountry = $extraFields[5]->find('a')[0]->innerText;
+                // тип (оригинал\переиздание)
                 $albumType = $extraFields[6]->find('a')[0]->innerText;
+                // состояние пластинки\конверта
                 $albumCondition = $extraFields[8]->find('a')[0]->innerText;
 
                 $append = "{$artistName} - {$albumName} '{$albumYear} \n<i>{$albumCountry} / {$albumLabel}</i>\n<b><i>{$lpPrice}</i></b> <i>({$albumType}, {$albumCondition})</i>\n<a href='{$productURL}'><b>Перейти на сайт</b></a>\n\n";

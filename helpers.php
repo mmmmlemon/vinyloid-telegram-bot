@@ -1,17 +1,12 @@
 <?php
 
-function eraseSpaces($string){
+// formatSpaces
+// замена пробелов на '%20'
+function formatSpaces($string){
     $newString = $string = str_replace(' ', '%20', $string);
 
     return $newString;
 }
 
-function normalizeString($string){
-
-    $string = strtolower($string);
-
-    return $string;
-
-}
 
 ?>

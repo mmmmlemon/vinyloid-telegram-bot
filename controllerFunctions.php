@@ -173,10 +173,27 @@ function generateProductList($searchText, $site, $pageToShow, $showMessageHeader
     }
 }
 
+// checklps
+// получает список пластинок\артистов которые нужно проверить и возвращает в index.php
+function checklpsCommand($chatId){
+    $messages = [];
+    $notifications = getList($chatId);
+
+    if(count($notifications) == 0){
+        return false;
+        // array_push($messages, "Нет пластинок или артистов для проверки. Добавьте их через команду /additem");
+    } 
+    else 
+    {   
+        return $notifications;
+    }
+
+}
+
 // additem - записать аритиста или пластинку в БД
 function addItemToList($chatId, $item){
 
-    $item = normalizeString($item);
+    $item = strtolower($item);
 
     $check = addListItemToDatabase($chatId, $item);
 
