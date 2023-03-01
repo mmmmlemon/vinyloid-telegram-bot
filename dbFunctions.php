@@ -8,9 +8,9 @@ function connectToDatabase(){
 
 	// данные длоя логина
 	$servername = "localhost";
-	$username = "mmmmlemon_vinyl";
-	$password = "CPPX4SrU";
-	$dbname = "mmmmlemon_vinyl";
+	$username = $_ENV['DB_USERNAME'];
+	$password = $_ENV['DB_PASSWORD'];
+	$dbname = $_ENV['DB_NAME'];
 
 	// Создание соединения
 	$connection = mysqli_connect($servername, $username, $password, $dbname);

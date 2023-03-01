@@ -1,15 +1,18 @@
 <?php
 
 require_once "vendor/autoload.php";
-require __DIR__ . '/token.php';
 require __DIR__ . '/helpers.php';
 // require __DIR__ . '/dbFunctions.php';
 require __DIR__ . '/controllerFunctions.php';
 
+
 try {
     
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+
     // API Токен
-    $token = getTelegramBotAPIToken();
+    $token = $_ENV['BOT_TOKEN'];
 
     // Telegram-бот
     $bot = new \TelegramBot\Api\Client($token);

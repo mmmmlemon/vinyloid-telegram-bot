@@ -56,7 +56,7 @@
             // если у пластинки указана старая цена, значит действует скидка, указываем обе цены
             if(count($lpPriceOld) > 0){
                 $lpPrice = strip_tags($productItem->find('div.products-grid-item__price')[0]->innerText);
-                $lpPriceOld = "<s>".$lpPriceOld[0]->innerText."</s>";
+                $lpPriceOld = "<s>".strip_tags($lpPriceOld[0]->innerText)."</s>";
                 $dotPos = strpos($lpPrice, ".")+1;
                 $lpPriceNew = substr($lpPrice, $dotPos, strlen($lpPrice) - $dotPos);
 
@@ -64,7 +64,7 @@
        
             } else {
                 // если нет, то просто указываем цену
-                $lpPrice = $productItem->find('div.products-grid-item__price')[0]->innerText;
+                $lpPrice = strip_tags($productItem->find('div.products-grid-item__price')[0]->innerText);
             }
     
             // если url не равен null, добавляем в сообщение

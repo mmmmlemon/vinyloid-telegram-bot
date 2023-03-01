@@ -1,6 +1,7 @@
 {
     "require": {
         "telegram-bot/api": "^2.3",
-        "voku/simple_html_dom": "^4.7"
+        "voku/simple_html_dom": "^4.7",
+        "vlucas/phpdotenv": "^5.5"
     }
 }
