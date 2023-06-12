@@ -7,7 +7,7 @@
  
  <p>Ниже можно увидеть несколько изображений как это работало</p>
  
- <img src="pics/screen_1.jpg" width="70%">
- <img src="pics/screen_2.jpg" width="70%">
- <img src="pics/screen_3.jpg" width="70%">
+ <img src="pics/screen_1.jpg" width="30%">
+ <img src="pics/screen_2.jpg" width="30%">
+ <img src="pics/screen_3.jpg" width="30%">
  
